@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>นาฬิกาชีวภาพ Circadian Rhythm และการนอนหลับ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans Thai', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            glow: '0 20px 80px rgba(59,130,246,.22)',
+            warm: '0 24px 70px rgba(245,158,11,.22)'
+          },
+          animation: {
+            float: 'float 6s ease-in-out infinite',
+            pulseSoft: 'pulseSoft 3s ease-in-out infinite',
+            spinSlow: 'spin 20s linear infinite'
+          },
+          keyframes: {
+            float: {
+              '0%,100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-12px)' }
+            },
+            pulseSoft: {
+              '0%,100%': { opacity: '.75', transform: 'scale(1)' },
+              '50%': { opacity: '1', transform: 'scale(1.04)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans Thai', system-ui, sans-serif; }
+    .glass { backdrop-filter: blur(18px); background: rgba(255,255,255,.72); }
+    .dark .glass { background: rgba(15,23,42,.72); }
+    .tab-active { background: linear-gradient(135deg,#2563eb,#7c3aed); color:white; box-shadow: 0 12px 30px rgba(37,99,235,.25); }
+    .timeline-dot::before { content:''; position:absolute; left:-.42rem; top:.48rem; width:.8rem; height:.8rem; border-radius:9999px; background:#2563eb; border:3px solid white; box-shadow:0 0 0 4px rgba(37,99,235,.15); }
+    .dark .timeline-dot::before { border-color:#0f172a; }
+    @media print {
+      .no-print { display:none !important; }
+      .print-only { display:block !important; }
+      body { background:white !important; }
+      #printArea { display:block !important; }
+      .page-break { page-break-before: always; }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+  <div class="fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute -top-32 -left-20 h-96 w-96 rounded-full bg-blue-300/40 blur-3xl dark:bg-blue-900/40"></div>
+    <div class="absolute top-24 right-0 h-[30rem] w-[30rem] rounded-full bg-amber-200/50 blur-3xl dark:bg-indigo-900/40"></div>
+    <div class="absolute bottom-0 left-1/3 h-96 w-96 rounded-full bg-violet-200/50 blur-3xl dark:bg-violet-950/50"></div>
+  </div>
+
+  <header class="sticky top-0 z-40 border-b border-white/60 bg-white/80 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/75 no-print">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
+      <a href="#top" class="flex items-center gap-3">
+        <div class="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 text-xl text-white shadow-glow">🧭</div>
+        <div>
+          <p class="text-sm font-black leading-tight md:text-base">Circadian Rhythm</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">นาฬิกาชีวภาพและการนอนหลับ</p>
+        </div>
+      </a>
+      <div class="hidden items-center gap-2 md:flex">
+        <a href="#learn" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">เรียนรู้</a>
+        <a href="#tools" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">เครื่องมือ</a>
+        <a href="#quiz" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">Quiz</a>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="darkToggle" class="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-bold shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800">🌙</button>
+        <button onclick="window.print()" class="rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-slate-700 dark:bg-white dark:text-slate-900">พิมพ์/PDF</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top" class="mx-auto max-w-7xl px-4 py-8 md:py-12">
+    <section class="grid items-center gap-8 lg:grid-cols-[1.05fr_.95fr]">
+      <div>
+        <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-blue-700 dark:border-blue-900 dark:bg-blue-950/60 dark:text-blue-200">
+          <span class="relative flex h-2 w-2"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-500 opacity-75"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-blue-600"></span></span>
+          Chronobiology • Sleep Health • Bedside Toolkit
+        </div>
+        <h1 class="text-4xl font-black tracking-tight text-slate-950 dark:text-white md:text-6xl">
+          นาฬิกาชีวภาพ
+          <span class="block bg-gradient-to-r from-blue-600 via-violet-600 to-amber-500 bg-clip-text text-transparent">Circadian Rhythm</span>
+          และการนอนหลับ
+        </h1>
+        <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
+          เข้าใจ “เวลาของร่างกาย” เพื่อแยกปัญหานอนไม่หลับจริงออกจากปัญหานาฬิกาชีวภาพ
+          และออกแบบกิจวัตร แสง เมลาโทนิน และ sleep diary ได้อย่างเป็นระบบ
+        </p>
+        <div class="mt-7 flex flex-wrap gap-3">
+          <a href="#tools" class="rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 px-5 py-3 font-bold text-white shadow-glow hover:opacity-95">เริ่มประเมินการนอน</a>
+          <a href="#learn" class="rounded-2xl border border-slate-200 bg-white px-5 py-3 font-bold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">อ่านสรุปความรู้</a>
+        </div>
+        <div class="mt-8 grid max-w-3xl gap-3 sm:grid-cols-3">
+          <div class="rounded-3xl border border-white/60 bg-white/70 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
+            <p class="text-2xl font-black">3 คำถาม</p>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">นอนนานแค่ไหน / ดีแค่ไหน / นอนเมื่อไร</p>
+          </div>
+          <div class="rounded-3xl border border-white/60 bg-white/70 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
+            <p class="text-2xl font-black">แสงเช้า</p>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">ช่วย phase advance ง่วงเร็วขึ้น ตื่นเร็วขึ้น</p>
+          </div>
+          <div class="rounded-3xl border border-white/60 bg-white/70 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
+            <p class="text-2xl font-black">Routine</p>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">prescribe routine before hypnotic</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative">
+        <div class="absolute inset-0 -z-10 rounded-[3rem] bg-gradient-to-br from-blue-500/20 via-violet-500/20 to-amber-300/20 blur-2xl"></div>
+        <div class="glass rounded-[2.5rem] border border-white/70 p-6 shadow-warm dark:border-slate-800">
+          <div class="relative mx-auto aspect-square max-w-md rounded-full bg-gradient-to-br from-sky-100 via-white to-amber-100 p-5 shadow-inner dark:from-slate-800 dark:via-slate-900 dark:to-indigo-950">
+            <div class="absolute inset-10 animate-spinSlow rounded-full border border-dashed border-blue-300 dark:border-blue-700"></div>
+            <div class="absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-amber-400 px-4 py-2 text-sm font-black text-amber-950 shadow-lg">☀️ Morning light</div>
+            <div class="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-indigo-900 px-4 py-2 text-sm font-black text-white shadow-lg">🌙 Melatonin</div>
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow dark:bg-slate-800 dark:text-slate-100">🌡️ Body temp</div>
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow dark:bg-slate-800 dark:text-slate-100">🧠 SCN</div>
+            <div class="grid h-full place-items-center rounded-full bg-white/60 dark:bg-slate-950/40">
+              <div class="text-center">
+                <div class="mx-auto mb-4 grid h-28 w-28 place-items-center rounded-full bg-gradient-to-br from-blue-600 to-violet-700 text-5xl text-white shadow-glow animate-pulseSoft">24h</div>
+                <p class="text-xl font-black">Master Clock</p>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">แสง → Retina → SCN → Reset clock</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 grid gap-3 sm:grid-cols-2">
+            <div class="rounded-3xl bg-white/70 p-4 dark:bg-slate-900/70">
+              <p class="text-sm font-bold text-slate-500 dark:text-slate-400">Zeitgeber สำคัญที่สุด</p>
+              <p class="mt-1 text-2xl font-black">แสง</p>
+            </div>
+            <div class="rounded-3xl bg-white/70 p-4 dark:bg-slate-900/70">
+              <p class="text-sm font-bold text-slate-500 dark:text-slate-400">ตัวรบกวนสำคัญ</p>
+              <p class="mt-1 text-2xl font-black">Artificial light</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="learn" class="mt-14">
+      <div class="mb-5 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p class="font-bold text-blue-600 dark:text-blue-300">Learning Map</p>
+          <h2 class="text-3xl font-black md:text-4xl">อ่านแบบ Interactive</h2>
+          <p class="mt-2 max-w-2xl text-slate-600 dark:text-slate-300">เลือกแท็บเพื่อดูเนื้อหาแต่ละมุม: biology, sleep health, แสง, กลุ่มโรค และเครื่องมือที่ใช้ข้างเตียง</p>
+        </div>
+        <div class="text-sm text-slate-500 dark:text-slate-400">แนะนำ: ใช้คู่กับ sleep diary อย่างน้อย 1–2 สัปดาห์</div>
+      </div>
+
+      <div class="no-print flex gap-2 overflow-x-auto rounded-3xl border border-slate-200 bg-white/80 p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900/80" id="tabButtons">
+        <button data-tab="overview" class="tab-btn tab-active whitespace-nowrap rounded-2xl px-4 py-3 text-sm font-black">ภาพรวม</button>
+        <button data-tab="biology" class="tab-btn whitespace-nowrap rounded-2xl px-4 py-3 text-sm font-black text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">Biology</button>
+        <button data-tab="sleephealth" class="tab-btn whitespace-nowrap rounded-2xl px-4 py-3 text-sm font-black text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">Sleep Health</button>
+        <button data-tab="light" class="tab-btn whitespace-nowrap rounded-2xl px-4 py-3 text-sm font-black text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">แสงและเวลา</button>
+        <button data-tab="disorders" class="tab-btn whitespace-nowrap rounded-2xl px-4 py-3 text-sm font-black text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">ความผิดปกติ</button>
+        <button data-tab="elderly" class="tab-btn whitespace-nowrap rounded-2xl px-4 py-3 text-sm font-black text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">ผู้สูงอายุ</button>
+        <button data-tab="bedside" class="tab-btn whitespace-nowrap rounded-2xl px-4 py-3 text-sm font-black text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">Bedside</button>
+      </div>
+
+      <div class="mt-5">
+        <article data-panel="overview" class="tab-panel grid gap-5 lg:grid-cols-3">
+          <div class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 lg:col-span-2">
+            <h3 class="text-2xl font-black">ทำไม Circadian Rhythm สำคัญ?</h3>
+            <p class="mt-4 leading-8 text-slate-600 dark:text-slate-300">
+              นาฬิกาชีวภาพไม่ได้สัมพันธ์กับการนอนเท่านั้น แต่เกี่ยวข้องกับการหลั่งฮอร์โมน
+              อุณหภูมิร่างกาย การทำงานของระบบต่าง ๆ และการประสานระหว่างการนอน เมลาโทนิน และอุณหภูมิร่างกาย
+            </p>
+            <div class="mt-6 grid gap-4 md:grid-cols-3">
+              <div class="rounded-3xl bg-blue-50 p-5 dark:bg-blue-950/40">
+                <div class="text-3xl">🧠</div>
+                <p class="mt-3 font-black">SCN</p>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">master clock ในสมอง คุมจังหวะ 24 ชั่วโมง</p>
+              </div>
+              <div class="rounded-3xl bg-amber-50 p-5 dark:bg-amber-950/30">
+                <div class="text-3xl">☀️</div>
+                <p class="mt-3 font-black">Light</p>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">ตัวตั้งเวลาสำคัญที่สุดของนาฬิกาชีวภาพ</p>
+              </div>
+              <div class="rounded-3xl bg-violet-50 p-5 dark:bg-violet-950/40">
+                <div class="text-3xl">🌙</div>
+                <p class="mt-3 font-black">Melatonin</p>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">ช่วยบอกเวลาความมืดและการเริ่มง่วง</p>
+              </div>
+            </div>
+          </div>
+          <aside class="rounded-[2rem] bg-slate-950 p-6 text-white shadow-glow dark:bg-white dark:text-slate-950">
+            <p class="text-sm font-bold opacity-70">Clinical Pearl</p>
+            <h3 class="mt-3 text-2xl font-black">ถามเพิ่มอีก 1 คำถาม</h3>
+            <p class="mt-4 leading-8 opacity-85">
+              ไม่ถามแค่ “นอนนานไหม” และ “นอนดีไหม” แต่ต้องถามว่า
+              <span class="font-black">“เข้านอนและตื่นกี่โมง?”</span>
+              เพราะการดูแลอาจไม่ใช่ยานอนหลับ แต่อาจเป็นการปรับจังหวะเวลา
+            </p>
+          </aside>
+        </article>
+
+        <article data-panel="biology" class="tab-panel hidden">
+          <div class="grid gap-5 lg:grid-cols-2">
+            <div class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <h3 class="text-2xl font-black">เส้นทางแสงสู่สมอง</h3>
+              <div class="mt-6 space-y-5">
+                <div class="relative ml-4 border-l-2 border-blue-100 pl-6 dark:border-blue-900">
+                  <div class="timeline-dot relative rounded-3xl bg-slate-50 p-4 dark:bg-slate-800"><b>1) แสง</b><br><span class="text-slate-600 dark:text-slate-300">zeitgeber หลักของร่างกาย</span></div>
+                  <div class="timeline-dot relative mt-4 rounded-3xl bg-slate-50 p-4 dark:bg-slate-800"><b>2) จอประสาทตา</b><br><span class="text-slate-600 dark:text-slate-300">รับข้อมูลความสว่างและช่วงเวลา</span></div>
+                  <div class="timeline-dot relative mt-4 rounded-3xl bg-slate-50 p-4 dark:bg-slate-800"><b>3) Suprachiasmatic Nucleus</b><br><span class="text-slate-600 dark:text-slate-300">reset biological clock</span></div>
+                  <div class="timeline-dot relative mt-4 rounded-3xl bg-slate-50 p-4 dark:bg-slate-800"><b>4) สัญญาณต่อร่างกาย</b><br><span class="text-slate-600 dark:text-slate-300">ฮอร์โมน อุณหภูมิ ระบบประสาท และการนอน</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <h3 class="text-2xl font-black">นาฬิกาชีวภาพประสาน 3 สิ่ง</h3>
+              <div class="mt-6 grid gap-4">
+                <div class="rounded-3xl border border-slate-100 p-5 dark:border-slate-800">
+                  <p class="font-black">Sleep-wake cycle</p>
+                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">เวลาหลับ–ตื่นที่สม่ำเสมอเป็นแกนกลาง</p>
+                </div>
+                <div class="rounded-3xl border border-slate-100 p-5 dark:border-slate-800">
+                  <p class="font-black">Melatonin rhythm</p>
+                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">เพิ่มในช่วงมืด ถูกกดได้จากแสงกลางคืน โดยเฉพาะหน้าจอสว่าง</p>
+                </div>
+                <div class="rounded-3xl border border-slate-100 p-5 dark:border-slate-800">
+                  <p class="font-black">Body temperature rhythm</p>
+                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">อุณหภูมิร่างกายมีจังหวะขึ้นลงสัมพันธ์กับความง่วงและความตื่นตัว</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article data-panel="sleephealth" class="tab-panel hidden">
+          <div class="grid gap-5 md:grid-cols-3">
+            <div class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <div class="text-4xl">⏱️</div>
+              <h3 class="mt-4 text-xl font-black">1) Sleep duration</h3>
+              <p class="mt-3 leading-7 text-slate-600 dark:text-slate-300">ระยะเวลาการนอนเพียงพอ ไม่สั้นเกินไปหรือยาวผิดปกติเมื่อเทียบกับบริบทผู้ป่วย</p>
+            </div>
+            <div class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <div class="text-4xl">🏗️</div>
+              <h3 class="mt-4 text-xl font-black">2) Sleep architecture</h3>
+              <p class="mt-3 leading-7 text-slate-600 dark:text-slate-300">โครงสร้างการนอนดี มีช่วงหลับลึกและการนอนที่ต่อเนื่องเพียงพอ</p>
+            </div>
+            <div class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <div class="text-4xl">🧭</div>
+              <h3 class="mt-4 text-xl font-black">3) Circadian alignment</h3>
+              <p class="mt-3 leading-7 text-slate-600 dark:text-slate-300">เวลานอนสอดคล้องกับชีวิตประจำวัน งาน ครอบครัว แสง และกิจกรรมกลางวัน</p>
+            </div>
+          </div>
+        </article>
+
+        <article data-panel="light" class="tab-panel hidden">
+          <div class="grid gap-5 lg:grid-cols-2">
+            <div class="rounded-[2rem] bg-gradient-to-br from-amber-100 to-white p-6 shadow-sm ring-1 ring-amber-200 dark:from-amber-950/40 dark:to-slate-900 dark:ring-amber-900">
+              <p class="text-sm font-black text-amber-700 dark:text-amber-200">Morning light</p>
+              <h3 class="mt-2 text-3xl font-black">Phase advance</h3>
+              <p class="mt-4 leading-8 text-slate-700 dark:text-slate-300">
+                แสงเช้าช่วยเลื่อนนาฬิกาชีวภาพให้เร็วขึ้น → ง่วงเร็วขึ้น ตื่นเร็วขึ้น เหมาะกับคนที่นอนดึกตื่นสาย
+              </p>
+              <div class="mt-5 rounded-3xl bg-white/70 p-4 text-sm dark:bg-slate-950/40">
+                ใช้คู่กับ: ตื่นเวลาเดิมทุกวัน, รับแสงเช้า, ลดงีบยาว, ลดหน้าจอดึก
+              </div>
+            </div>
+            <div class="rounded-[2rem] bg-gradient-to-br from-indigo-100 to-white p-6 shadow-sm ring-1 ring-indigo-200 dark:from-indigo-950/50 dark:to-slate-900 dark:ring-indigo-900">
+              <p class="text-sm font-black text-indigo-700 dark:text-indigo-200">Evening / night light</p>
+              <h3 class="mt-2 text-3xl font-black">Phase delay</h3>
+              <p class="mt-4 leading-8 text-slate-700 dark:text-slate-300">
+                แสงเย็นหรือแสงกลางคืน โดยเฉพาะหน้าจอสว่าง อาจเลื่อนนาฬิกาให้ช้าลง → นอนดึกขึ้น ตื่นสายขึ้น
+              </p>
+              <div class="mt-5 rounded-3xl bg-white/70 p-4 text-sm dark:bg-slate-950/40">
+                ลดความสว่างจอ / ใช้ night mode / หลีกเลี่ยง bright light ก่อนนอน / ทำ ritual เข้านอน
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article data-panel="disorders" class="tab-panel hidden">
+          <div class="grid gap-4 md:grid-cols-2">
+            <div class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <h3 class="text-xl font-black">1) Delayed sleep-wake phase disorder</h3>
+              <p class="mt-3 leading-7 text-slate-600 dark:text-slate-300">“นอนไม่หลับ นอนตี 2–3 ตื่นสาย ถ้าได้นอนตื่นสายก็ไม่มีปัญหา” มักพบในวัยรุ่นหรือ night owl</p>
+              <p class="mt-4 rounded-2xl bg-blue-50 p-4 text-sm dark:bg-blue-950/40">แนวทาง: แสงเช้า + ลดแสงเย็น/ดึก + อาจพิจารณา timing ของ melatonin ตามบริบท</p>
+            </div>
+            <div class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <h3 class="text-xl font-black">2) Advanced sleep-wake phase disorder</h3>
+              <p class="mt-3 leading-7 text-slate-600 dark:text-slate-300">“ตื่นตี 4 แล้วนอนต่อไม่ได้” พบมากขึ้นในผู้สูงอายุ เป็น age-related change ได้</p>
+              <p class="mt-4 rounded-2xl bg-amber-50 p-4 text-sm dark:bg-amber-950/30">แนวทาง: รับแสงช่วงเย็น หรือปรับยอมรับเวลาเข้านอนที่เร็วขึ้นตามนาฬิกาชีวิต</p>
+            </div>
+            <div class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <h3 class="text-xl font-black">3) Irregular sleep-wake rhythm disorder</h3>
+              <p class="mt-3 leading-7 text-slate-600 dark:text-slate-300">หลับเป็นช่วง ๆ fragmented sleep กลางคืนไม่นอน กลางวันง่วง พบได้ใน dementia</p>
+              <p class="mt-4 rounded-2xl bg-violet-50 p-4 text-sm dark:bg-violet-950/40">แนวทาง: จัดตารางกิจกรรมกลางวัน แสงกลางวัน routine และ caregiver support</p>
+            </div>
+            <div class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <h3 class="text-xl font-black">4) Non-24-hour sleep-wake rhythm</h3>
+              <p class="mt-3 leading-7 text-slate-600 dark:text-slate-300">นาฬิกาชีวภาพเคลื่อนไปข้างหน้าเรื่อย ๆ มักพบในคนตาบอดที่ไม่มีแสงช่วยตั้งนาฬิกา</p>
+              <p class="mt-4 rounded-2xl bg-slate-100 p-4 text-sm dark:bg-slate-800">แนวทาง: ต้องประเมิน pattern ต่อเนื่องและจัดการเฉพาะราย</p>
+            </div>
+          </div>
+        </article>
+
+        <article data-panel="elderly" class="tab-panel hidden">
+          <div class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+            <h3 class="text-2xl font-black">อายุที่มากขึ้นทำให้ Circadian rhythm แย่ลงอย่างไร?</h3>
+            <div class="mt-6 grid gap-5 md:grid-cols-3">
+              <div class="rounded-3xl bg-slate-50 p-5 dark:bg-slate-800">
+                <p class="text-3xl">🧠</p>
+                <h4 class="mt-3 font-black">Central clock เปลี่ยน</h4>
+                <p class="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">SCN neuron ลดลง การสั่งการลดลง และ melatonin rhythm เปลี่ยน</p>
+              </div>
+              <div class="rounded-3xl bg-slate-50 p-5 dark:bg-slate-800">
+                <p class="text-3xl">👁️</p>
+                <h4 class="mt-3 font-black">Light input ลดลง</h4>
+                <p class="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">จอประสาทตาตอบสนองลดลง ต้อกระจกหรือ lens yellowing ทำให้รับแสงลดลง</p>
+              </div>
+              <div class="rounded-3xl bg-slate-50 p-5 dark:bg-slate-800">
+                <p class="text-3xl">🚶</p>
+                <h4 class="mt-3 font-black">Zeitgeber ทางสังคมลดลง</h4>
+                <p class="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">ออกจากบ้านน้อย กิจกรรมลดลง นอนกลางวันมาก และ social interaction ลดลง</p>
+              </div>
+            </div>
+            <div class="mt-6 rounded-3xl bg-gradient-to-r from-blue-600 to-violet-600 p-5 text-white">
+              <b>ประเด็นสำคัญ:</b> sleep-circadian disturbance ใน dementia เพิ่มภาระผู้ดูแล เช่น nighttime wandering และ fragmented sleep ควร detect ให้ได้ก่อนให้ยานอนหลับ
+            </div>
+          </div>
+        </article>
+
+        <article data-panel="bedside" class="tab-panel hidden">
+          <div class="grid gap-5 lg:grid-cols-2">
+            <div class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <h3 class="text-2xl font-black">Bedside Toolkit</h3>
+              <ul class="mt-5 space-y-3 text-slate-600 dark:text-slate-300">
+                <li class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">✅ Sleep diary / sleep-wake log</li>
+                <li class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">✅ Caregiver report โดยเฉพาะผู้สูงอายุหรือ dementia</li>
+                <li class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">✅ Actigraphy เมื่อมีข้อบ่งชี้หรือ pattern ไม่ชัด</li>
+                <li class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">✅ Bright light therapy และ melatonin timing ตามปัญหา</li>
+              </ul>
+            </div>
+            <div class="rounded-[2rem] bg-slate-950 p-6 text-white shadow-glow dark:bg-white dark:text-slate-950">
+              <p class="text-sm font-bold opacity-70">Key Message</p>
+              <h3 class="mt-3 text-3xl font-black">Prescribe a routine before a hypnotic</h3>
+              <p class="mt-5 leading-8 opacity-85">
+                ลอง sleep log, ตั้งเวลารับแสง, วางกิจวัตรกลางวัน–กลางคืน และดู pattern “เมื่อไร” ก่อนรีบสรุปว่าเป็น insomnia และให้ยานอนหลับทันที
+              </p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="tools" class="mt-16">
+      <div class="mb-6">
+        <p class="font-bold text-blue-600 dark:text-blue-300">Interactive Tools</p>
+        <h2 class="text-3xl font-black md:text-4xl">เครื่องมือประเมินและวางแผน</h2>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-2">
+        <section class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h3 class="text-2xl font-black">Sleep Timing Calculator</h3>
+              <p class="mt-2 text-slate-600 dark:text-slate-300">ใส่เวลาเข้านอน–ตื่น เพื่อดู sleep duration และคำแนะนำเบื้องต้น</p>
+            </div>
+            <div class="rounded-2xl bg-blue-50 px-4 py-2 text-xl dark:bg-blue-950/50">⏰</div>
+          </div>
+
+          <div class="mt-6 grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="text-sm font-bold">เวลาเข้านอน</span>
+              <input id="bedTime" type="time" value="23:00" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-lg font-bold outline-none focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-blue-900">
+            </label>
+            <label class="block">
+              <span class="text-sm font-bold">เวลาตื่น</span>
+              <input id="wakeTime" type="time" value="06:30" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-lg font-bold outline-none focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-blue-900">
+            </label>
+          </div>
+          <button id="calcSleep" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 px-5 py-3 font-black text-white shadow-glow">คำนวณ</button>
+          <div id="sleepResult" class="mt-5 rounded-3xl bg-slate-50 p-5 dark:bg-slate-800"></div>
+        </section>
+
+        <section class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h3 class="text-2xl font-black">เลือก Pattern แล้วดูแนวทาง</h3>
+              <p class="mt-2 text-slate-600 dark:text-slate-300">ช่วยคิดจากมุม circadian rhythm ไม่ใช่ insomnia เสมอไป</p>
+            </div>
+            <div class="rounded-2xl bg-violet-50 px-4 py-2 text-xl dark:bg-violet-950/50">🧭</div>
+          </div>
+
+          <label class="mt-6 block">
+            <span class="text-sm font-bold">ลักษณะที่ใกล้เคียงที่สุด</span>
+            <select id="patternSelect" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-bold outline-none focus:ring-4 focus:ring-violet-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-violet-900">
+              <option value="delay">นอนดึกมาก ตื่นสาย ถ้าได้นอนสายจะโอเค</option>
+              <option value="advance">ง่วงเร็ว ตื่นเช้ามาก เช่น ตี 4 แล้วนอนต่อไม่ได้</option>
+              <option value="irregular">หลับ ๆ ตื่น ๆ ทั้งวัน กลางคืนไม่นอน</option>
+              <option value="non24">เวลานอนเลื่อนไปเรื่อย ๆ ทุกวัน</option>
+            </select>
+          </label>
+          <div id="patternAdvice" class="mt-5 rounded-3xl bg-slate-50 p-5 leading-8 dark:bg-slate-800"></div>
+        </section>
+
+        <section class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 lg:col-span-2">
+          <div class="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+            <div>
+              <h3 class="text-2xl font-black">Routine Prescription Checklist</h3>
+              <p class="mt-2 text-slate-600 dark:text-slate-300">เช็กลิสต์สำหรับปรับนาฬิกาชีวภาพก่อนใช้ hypnotic</p>
+            </div>
+            <button id="resetChecklist" class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-bold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">ล้างรายการ</button>
+          </div>
+          <div id="routineChecklist" class="mt-5 grid gap-3 md:grid-cols-2"></div>
+        </section>
+
+        <section class="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 lg:col-span-2">
+          <div class="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+            <div>
+              <h3 class="text-2xl font-black">Sleep Diary / Sleep-Wake Log</h3>
+              <p class="mt-2 text-slate-600 dark:text-slate-300">บันทึกแบบ localStorage ในเครื่องผู้ใช้ สามารถ export CSV หรือพิมพ์เฉพาะสรุปได้</p>
+            </div>
+            <div class="flex flex-wrap gap-2 no-print">
+              <button id="exportCsv" class="rounded-2xl bg-slate-900 px-4 py-2 text-sm font-bold text-white dark:bg-white dark:text-slate-900">Export CSV</button>
+              <button id="clearDiary" class="rounded-2xl border border-red-200 px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950/40">ล้างบันทึก</button>
+            </div>
+          </div>
+
+          <div class="mt-5 grid gap-3 md:grid-cols-6 no-print">
+            <input id="diaryDate" type="date" class="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-950">
+            <input id="diaryBed" type="time" class="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-950" title="เข้านอน">
+            <input id="diaryWake" type="time" class="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-950" title="ตื่น">
+            <select id="diaryQuality" class="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-950">
+              <option value="ดี">คุณภาพดี</option>
+              <option value="ปานกลาง">ปานกลาง</option>
+              <option value="แย่">แย่</option>
+            </select>
+            <input id="diaryNote" placeholder="หมายเหตุ เช่น งีบ/คาเฟอีน/หน้าจอ" class="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-950 md:col-span-2">
+          </div>
+          <button id="addDiary" class="mt-3 rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 px-5 py-3 font-black text-white shadow-glow no-print">เพิ่มบันทึก</button>
+
+          <div id="diarySummary" class="mt-5 grid gap-3 md:grid-cols-4"></div>
+          <div class="mt-5 overflow-x-auto">
+            <table class="w-full min-w-[720px] overflow-hidden rounded-3xl text-left text-sm">
+              <thead class="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                <tr>
+                  <th class="px-4 py-3">วันที่</th>
+                  <th class="px-4 py-3">เข้านอน</th>
+                  <th class="px-4 py-3">ตื่น</th>
+                  <th class="px-4 py-3">ชั่วโมงนอน</th>
+                  <th class="px-4 py-3">คุณภาพ</th>
+                  <th class="px-4 py-3">หมายเหตุ</th>
+                  <th class="px-4 py-3 no-print">ลบ</th>
+                </tr>
+              </thead>
+              <tbody id="diaryTable" class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="quiz" class="mt-16 rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-blue-950 to-violet-950 p-6 text-white shadow-glow md:p-8">
+      <div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p class="font-bold text-blue-200">Knowledge Check</p>
+          <h2 class="text-3xl font-black md:text-4xl">Quiz ทบทวนความเข้าใจ</h2>
+          <p class="mt-2 max-w-2xl text-blue-100/80">ตอบคำถามสั้น ๆ เพื่อเช็กว่าเข้าใจหลักการแยก circadian problem จาก insomnia หรือไม่</p>
+        </div>
+        <button id="submitQuiz" class="rounded-2xl bg-white px-5 py-3 font-black text-slate-950 shadow-lg">ตรวจคำตอบ</button>
+      </div>
+      <div id="quizBox" class="mt-7 grid gap-4 md:grid-cols-2"></div>
+      <div id="quizResult" class="mt-6 hidden rounded-3xl bg-white/10 p-5 text-lg font-bold"></div>
+    </section>
+
+    <section class="mt-16 rounded-[2.5rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+      <h2 class="text-2xl font-black">สรุป 5 Key Messages</h2>
+      <div class="mt-5 grid gap-4 md:grid-cols-5">
+        <div class="rounded-3xl bg-slate-50 p-4 dark:bg-slate-800"><b>1</b><p class="mt-2 text-sm leading-7">SCN คือ master clock คุมจังหวะ 24 ชั่วโมง</p></div>
+        <div class="rounded-3xl bg-slate-50 p-4 dark:bg-slate-800"><b>2</b><p class="mt-2 text-sm leading-7">อายุมากขึ้นทำให้ตอบสนองต่อ zeitgeber ลดลง</p></div>
+        <div class="rounded-3xl bg-slate-50 p-4 dark:bg-slate-800"><b>3</b><p class="mt-2 text-sm leading-7">แสง กิจวัตร และ melatonin timing ช่วยปรับได้</p></div>
+        <div class="rounded-3xl bg-slate-50 p-4 dark:bg-slate-800"><b>4</b><p class="mt-2 text-sm leading-7">ถามเสมอว่า “นอนเมื่อไร” ไม่ใช่แค่นอนเท่าไร</p></div>
+        <div class="rounded-3xl bg-slate-50 p-4 dark:bg-slate-800"><b>5</b><p class="mt-2 text-sm leading-7">Prescribe routine before hypnotic</p></div>
+      </div>
+    </section>
+
+    <footer class="mt-12 pb-8 text-center text-sm text-slate-500 dark:text-slate-400">
+      HTML single file • Tailwind CDN • LocalStorage • พร้อม deploy เป็น GitHub Pages
+    </footer>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function minutesFromTime(t) {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function durationHours(bed, wake) {
+      let b = minutesFromTime(bed), w = minutesFromTime(wake);
+      if (w <= b) w += 24 * 60;
+      return (w - b) / 60;
+    }
+
+    function formatHours(h) {
+      const hours = Math.floor(h);
+      const mins = Math.round((h - hours) * 60);
+      return `${hours} ชม. ${mins} นาที`;
+    }
+
+    const darkToggle = $('darkToggle');
+    const savedTheme = localStorage.getItem('circadian_theme');
+    if (savedTheme === 'dark') document.documentElement.classList.add('dark');
+    darkToggle.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+    darkToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('circadian_theme', isDark ? 'dark' : 'light');
+      darkToggle.textContent = isDark ? '☀️' : '🌙';
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.remove('tab-active');
+          b.classList.add('text-slate-600','dark:text-slate-300');
+        });
+        btn.classList.add('tab-active');
+        btn.classList.remove('text-slate-600','dark:text-slate-300');
+        const target = btn.dataset.tab;
+        document.querySelectorAll('.tab-panel').forEach(panel => {
+          panel.classList.toggle('hidden', panel.dataset.panel !== target);
+        });
+      });
+    });
+
+    function calcSleep() {
+      const bed = $('bedTime').value;
+      const wake = $('wakeTime').value;
+      const h = durationHours(bed, wake);
+      let label = '', advice = '', cls = '';
+      const bedMin = minutesFromTime(bed);
+      if (h < 6) {
+        label = 'นอนค่อนข้างน้อย';
+        advice = 'ควรดูสาเหตุ เช่น งานกะ คาเฟอีน หน้าจอ แสงกลางคืน หรือภาวะตื่นกลางคืนบ่อย';
+        cls = 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-200';
+      } else if (h <= 9) {
+        label = 'ระยะเวลานอนอยู่ในช่วงเหมาะสมโดยรวม';
+        advice = 'ขั้นต่อไปให้ดูคุณภาพการนอน และ alignment ว่าเวลานอนเข้ากับชีวิตประจำวันหรือไม่';
+        cls = 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200';
+      } else {
+        label = 'นอนยาว ควรดูบริบท';
+        advice = 'ถ้าง่วงกลางวันมาก อาจต้องดูคุณภาพการนอน โรคร่วม ยา หรือ fragmented sleep';
+        cls = 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-200';
+      }
+
+      let phase = '';
+      if (bedMin >= 120 && bedMin <= 300) {
+        phase = 'เวลาเข้านอนดึกมาก อาจเข้า pattern delayed sleep-wake phase โดยเฉพาะถ้าตื่นสายแล้วรู้สึกปกติ';
+      } else if (bedMin >= 1080 && bedMin <= 1260) {
+        phase = 'เวลาเข้านอนค่อนข้างเร็ว ถ้ามีตื่นตี 3–4 แล้วนอนต่อไม่ได้ อาจคิดถึง advanced phase ในผู้สูงอายุ';
+      } else {
+        phase = 'ให้ติดตามเวลาเข้านอน–ตื่นต่อเนื่องเพื่อดูความสม่ำเสมอ';
+      }
+
+      $('sleepResult').innerHTML = `
+        <div class="rounded-2xl ${cls} p-4">
+          <p class="text-sm font-bold opacity-80">Sleep duration</p>
+          <p class="mt-1 text-3xl font-black">${formatHours(h)}</p>
+          <p class="mt-2 font-bold">${label}</p>
+        </div>
+        <div class="mt-4 grid gap-3 md:grid-cols-2">
+          <div class="rounded-2xl bg-white p-4 dark:bg-slate-900"><b>คำแนะนำ</b><p class="mt-1 text-sm leading-7 text-slate-600 dark:text-slate-300">${advice}</p></div>
+          <div class="rounded-2xl bg-white p-4 dark:bg-slate-900"><b>Circadian clue</b><p class="mt-1 text-sm leading-7 text-slate-600 dark:text-slate-300">${phase}</p></div>
+        </div>`;
+    }
+    $('calcSleep').addEventListener('click', calcSleep);
+    calcSleep();
+
+    const adviceMap = {
+      delay: {
+        title: 'Delayed sleep-wake phase',
+        text: 'เน้นรับแสงเช้าหลังตื่นให้สม่ำเสมอ ลด bright light/หน้าจอช่วงเย็น-ดึก ตั้งเวลาตื่นคงที่ และใช้ sleep diary ดู pattern อย่างน้อย 1–2 สัปดาห์'
+      },
+      advance: {
+        title: 'Advanced sleep-wake phase',
+        text: 'พบได้ในผู้สูงอายุ พิจารณารับแสงช่วงเย็น ลดการเข้านอนเร็วเกินจำเป็น หรือปรับกิจวัตรให้สอดคล้องกับนาฬิกาชีวิต ถ้าไม่กระทบหน้าที่อาจไม่ใช่โรค'
+      },
+      irregular: {
+        title: 'Irregular sleep-wake rhythm',
+        text: 'เน้น structure routine: ตื่นเวลาเดิม แสงกลางวัน กิจกรรมกลางวัน ลดงีบยาว ลดสิ่งกระตุ้นกลางคืน และเก็บ caregiver report โดยเฉพาะผู้ป่วย dementia'
+      },
+      non24: {
+        title: 'Non-24-hour sleep-wake rhythm',
+        text: 'สงสัยเมื่อเวลานอนเลื่อนไปเรื่อย ๆ โดยเฉพาะผู้ที่รับแสงไม่ได้ ควรติดตาม pattern ต่อเนื่องและวางแผนเฉพาะราย'
+      }
+    };
+    function updatePatternAdvice() {
+      const val = $('patternSelect').value;
+      const item = adviceMap[val];
+      $('patternAdvice').innerHTML = `<p class="text-xl font-black">${item.title}</p><p class="mt-3 text-slate-600 dark:text-slate-300">${item.text}</p>`;
+    }
+    $('patternSelect').addEventListener('change', updatePatternAdvice);
+    updatePatternAdvice();
+
+    const routineItems = [
+      'ตื่นเวลาเดิมทุกวัน แม้วันหยุด',
+      'รับแสงเช้าหลังตื่น 20–30 นาทีเมื่อทำได้',
+      'ลดแสงจ้าและหน้าจอก่อนนอน 1–2 ชั่วโมง',
+      'จำกัดงีบกลางวัน ไม่ให้นานหรือใกล้เย็นเกินไป',
+      'จัดกิจกรรมกลางวัน เช่น เดิน ออกกำลังเบา ๆ',
+      'ลดคาเฟอีนช่วงบ่าย–เย็น',
+      'ทำ ritual ก่อนนอน เช่น อาบน้ำอุ่น อ่านหนังสือเบา ๆ',
+      'บันทึก sleep diary อย่างน้อย 7–14 วัน',
+      'ประเมินยา โรคร่วม ปวด ปัสสาวะกลางคืน และ OSA risk',
+      'คุยกับ caregiver หากเป็นผู้สูงอายุหรือ dementia'
+    ];
+    let checkedRoutine = JSON.parse(localStorage.getItem('circadian_routine') || '[]');
+    function renderChecklist() {
+      $('routineChecklist').innerHTML = routineItems.map((item, i) => `
+        <label class="flex cursor-pointer items-start gap-3 rounded-3xl border border-slate-100 bg-slate-50 p-4 hover:bg-blue-50 dark:border-slate-800 dark:bg-slate-800 dark:hover:bg-blue-950/30">
+          <input type="checkbox" data-routine="${i}" ${checkedRoutine.includes(i) ? 'checked' : ''} class="mt-1 h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+          <span class="font-semibold">${item}</span>
+        </label>
+      `).join('');
+      document.querySelectorAll('[data-routine]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const idx = Number(cb.dataset.routine);
+          if (cb.checked && !checkedRoutine.includes(idx)) checkedRoutine.push(idx);
+          if (!cb.checked) checkedRoutine = checkedRoutine.filter(x => x !== idx);
+          localStorage.setItem('circadian_routine', JSON.stringify(checkedRoutine));
+        });
+      });
+    }
+    $('resetChecklist').addEventListener('click', () => {
+      checkedRoutine = [];
+      localStorage.removeItem('circadian_routine');
+      renderChecklist();
+    });
+    renderChecklist();
+
+    const today = new Date().toISOString().slice(0,10);
+    $('diaryDate').value = today;
+    $('diaryBed').value = '23:00';
+    $('diaryWake').value = '06:30';
+
+    let diary = JSON.parse(localStorage.getItem('circadian_diary') || '[]');
+    function saveDiary() {
+      localStorage.setItem('circadian_diary', JSON.stringify(diary));
+    }
+    function renderDiary() {
+      const tbody = $('diaryTable');
+      if (!diary.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">ยังไม่มีบันทึก</td></tr>`;
+        $('diarySummary').innerHTML = '';
+        return;
+      }
+      tbody.innerHTML = diary.map((d, idx) => `
+        <tr>
+          <td class="px-4 py-3 font-bold">${d.date}</td>
+          <td class="px-4 py-3">${d.bed}</td>
+          <td class="px-4 py-3">${d.wake}</td>
+          <td class="px-4 py-3">${formatHours(d.hours)}</td>
+          <td class="px-4 py-3">${d.quality}</td>
+          <td class="px-4 py-3">${d.note || '-'}</td>
+          <td class="px-4 py-3 no-print"><button data-del="${idx}" class="rounded-xl bg-red-50 px-3 py-1 text-xs font-bold text-red-600 hover:bg-red-100 dark:bg-red-950/40">ลบ</button></td>
+        </tr>`).join('');
+      document.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', () => {
+        diary.splice(Number(btn.dataset.del), 1);
+        saveDiary(); renderDiary();
+      }));
+      const avg = diary.reduce((s,d) => s + d.hours, 0) / diary.length;
+      const bedAvg = Math.round(diary.reduce((s,d)=>s + minutesFromTime(d.bed),0)/diary.length);
+      const wakeAvgRaw = Math.round(diary.reduce((s,d)=>s + minutesFromTime(d.wake),0)/diary.length);
+      const qualityCounts = diary.reduce((acc,d)=>{acc[d.quality]=(acc[d.quality]||0)+1; return acc;},{});
+      const bestQuality = Object.entries(qualityCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || '-';
+      $('diarySummary').innerHTML = `
+        <div class="rounded-3xl bg-blue-50 p-4 dark:bg-blue-950/40"><p class="text-sm font-bold opacity-70">จำนวนบันทึก</p><p class="mt-1 text-2xl font-black">${diary.length} วัน</p></div>
+        <div class="rounded-3xl bg-emerald-50 p-4 dark:bg-emerald-950/40"><p class="text-sm font-bold opacity-70">นอนเฉลี่ย</p><p class="mt-1 text-2xl font-black">${formatHours(avg)}</p></div>
+        <div class="rounded-3xl bg-violet-50 p-4 dark:bg-violet-950/40"><p class="text-sm font-bold opacity-70">เข้านอนเฉลี่ย</p><p class="mt-1 text-2xl font-black">${String(Math.floor(bedAvg/60)).padStart(2,'0')}:${String(bedAvg%60).padStart(2,'0')}</p></div>
+        <div class="rounded-3xl bg-amber-50 p-4 dark:bg-amber-950/30"><p class="text-sm font-bold opacity-70">คุณภาพที่พบบ่อย</p><p class="mt-1 text-2xl font-black">${bestQuality}</p></div>`;
+    }
+    $('addDiary').addEventListener('click', () => {
+      const date = $('diaryDate').value, bed = $('diaryBed').value, wake = $('diaryWake').value;
+      if (!date || !bed || !wake) return alert('กรุณาใส่วันที่ เวลาเข้านอน และเวลาตื่น');
+      diary.unshift({
+        date, bed, wake,
+        hours: durationHours(bed, wake),
+        quality: $('diaryQuality').value,
+        note: $('diaryNote').value.trim()
+      });
+      saveDiary(); renderDiary(); $('diaryNote').value='';
+    });
+    $('clearDiary').addEventListener('click', () => {
+      if (confirm('ล้าง sleep diary ทั้งหมด?')) {
+        diary = []; saveDiary(); renderDiary();
+      }
+    });
+    $('exportCsv').addEventListener('click', () => {
+      const headers = ['date','bed_time','wake_time','sleep_hours','quality','note'];
+      const rows = diary.map(d => [d.date,d.bed,d.wake,d.hours.toFixed(2),d.quality,d.note || '']);
+      const csv = [headers, ...rows].map(r => r.map(x => `"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'sleep_diary_circadian.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+    renderDiary();
+
+    const questions = [
+      {q:'Zeitgeber ที่สำคัญที่สุดของ Circadian rhythm คืออะไร?', a:'แสง', choices:['อาหาร','แสง','เสียง','อุณหภูมิห้อง']},
+      {q:'คำถามที่ควรถามเพิ่มนอกจาก “นอนนานแค่ไหน” คืออะไร?', a:'เข้านอนและตื่นกี่โมง', choices:['ฝันอะไร','เข้านอนและตื่นกี่โมง','หมอนสูงแค่ไหน','เปิดแอร์กี่องศา']},
+      {q:'แสงเช้ามักทำให้เกิดผลใด?', a:'Phase advance', choices:['Phase advance','Phase delay','Sleep paralysis','REM rebound']},
+      {q:'แสงตอนเย็น/กลางคืนโดยเฉพาะหน้าจอสว่างมักทำให้เกิดผลใด?', a:'Phase delay', choices:['Phase advance','Phase delay','เพิ่มหลับลึกเสมอ','ไม่มีผลต่อเมลาโทนิน']},
+      {q:'นอนตี 2–3 ตื่นสาย แต่ถ้าได้นอนสายแล้วปกติ คิดถึงภาวะใด?', a:'Delayed sleep-wake phase disorder', choices:['Advanced sleep-wake phase disorder','Delayed sleep-wake phase disorder','Narcolepsy','Sleep apnea']},
+      {q:'ผู้สูงอายุตื่นตี 4 แล้วนอนต่อไม่ได้ อาจสัมพันธ์กับภาวะใด?', a:'Advanced sleep-wake phase disorder', choices:['Advanced sleep-wake phase disorder','Non-24-hour rhythm','Delayed phase','Jet lag เท่านั้น']},
+      {q:'เครื่องมือ bedside ที่ควรเริ่มใช้ก่อนรีบให้ hypnotic คืออะไร?', a:'Sleep diary / sleep-wake log', choices:['CT brain ทุกคน','Sleep diary / sleep-wake log','ให้ยานอนหลับทันที','งดแสงเช้าทั้งหมด']},
+      {q:'ประโยคสรุปสำคัญคืออะไร?', a:'Prescribe a routine before a hypnotic', choices:['Bright light is always harmful','Prescribe a routine before a hypnotic','Sleep timing is irrelevant','Insomnia ทุกคนต้องเริ่มยานอนหลับ']}
+    ];
+    function renderQuiz() {
+      $('quizBox').innerHTML = questions.map((item, idx) => `
+        <div class="rounded-3xl bg-white/10 p-5 ring-1 ring-white/10">
+          <p class="font-black">${idx+1}. ${item.q}</p>
+          <div class="mt-4 space-y-2">
+            ${item.choices.map((c, ci) => `
+              <label class="flex cursor-pointer gap-3 rounded-2xl bg-white/10 p-3 hover:bg-white/15">
+                <input type="radio" name="q${idx}" value="${c}" class="mt-1">
+                <span>${c}</span>
+              </label>`).join('')}
+          </div>
+        </div>`).join('');
+    }
+    $('submitQuiz').addEventListener('click', () => {
+      let score = 0;
+      questions.forEach((item, idx) => {
+        const selected = document.querySelector(`input[name="q${idx}"]:checked`);
+        if (selected && selected.value === item.a) score++;
+      });
+      const pct = Math.round(score / questions.length * 100);
+      let msg = pct >= 80 ? 'ยอดเยี่ยม เข้าใจหลัก circadian rhythm ดีมาก' : pct >= 50 ? 'ดีแล้ว ลองทบทวนเรื่องแสงเช้า/แสงเย็นและ sleep phase อีกนิด' : 'ลองกลับไปอ่านแท็บ “แสงและเวลา” และ “ความผิดปกติ” อีกครั้ง';
+      $('quizResult').classList.remove('hidden');
+      $('quizResult').innerHTML = `คะแนน: ${score}/${questions.length} (${pct}%) — ${msg}`;
+    });
+    renderQuiz();
+  </script>
+</body>
+</html>
